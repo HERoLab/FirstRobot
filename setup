@@ -1,0 +1,7 @@
+#The following are libraries that need to be installed:
+sudo apt-get install freenect #See freenect site for more instructions.
+sudo apt-get install python-numpy python-opencv
+sudo apt-get install screen
+sudo apt-get install openssh-server
+
+
