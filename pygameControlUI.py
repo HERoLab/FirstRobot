@@ -18,6 +18,7 @@ leftSpeed = originSpeed
 rightSpeed = originSpeed
 breakDelay = 10
 eventWait = 50
+motorOffset = 55 #The offset for the left motor (see Arduino Program).
 keysPressed = None
 
 # # # # # # # # # # #  Main UI Function  # # # # # # # # # # # 
@@ -43,8 +44,20 @@ def main():
 
   #Final Variable Setup:
   noKeyDuration = 0
-  running = True
   turning = False
+
+  serialConnection = None
+  #Check each COM port for Arduino's special "ACM0" port.
+  for port in list_ports.comports():
+    for data in port:
+      if "ACM0" in data:
+        serialConnection = serial.Serial(data, badurate=9600)
+        print "--Established serial connection!"
+
+  if not serialConnection:
+    print "ERROR: Failed to make serial connection!"
+    running = False
+    
 
   while running:
     pygame.event.pump() #Flush the last key presses.
@@ -120,16 +133,26 @@ def main():
       else:
         noKeyDuration += 1
 
+    #Write the speeds to the serial ports.
+    serialConnection.write(hex(leftSpeed+motorOffset))
+    serialConnection.write(hex(rightSpeed))
+
+    #Render the UI elements.
     color = (55, 255, 100)
     left = fontStyle.render("Left: {}".format(leftSpeed-originSpeed), 1, color)
     right = fontStyle.render("Right: {}".format(rightSpeed-originSpeed), 1, color)
     direction = fontStyle.render("Direction: {}".format(getDirection()), 1, color)
 
+    #Draw the rendered elements on the screen (strangely called "blit" in PyGame).
     screen.blit(background, (0, 0))
     screen.blit(left, (50, 50))
     screen.blit(right, (50, 80))
     screen.blit(direction, (50, 110))
+  
+    #Display (or apparently "flip") the screen.
     pygame.display.flip()
+
+    #Add a delay so the operations don't occur too quickly.
     pygame.time.delay(eventWait)
 
   #Close the window.
