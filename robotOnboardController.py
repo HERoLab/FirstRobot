@@ -44,8 +44,9 @@ while True:
   if timeout > 1000:
     break
 
-  #controllerConnection.sendall(data)
-  data = json.loads(raw_data)
+  #Only use the most recent speed in case a packet is lost.
+  mostRecentData = raw_data.split("$")[-2]
+  data = json.loads(mostRecentData)
 
   #Write the speeds to the serial ports.
   serialConnection.write(hex(data["left"]+motorOffset))

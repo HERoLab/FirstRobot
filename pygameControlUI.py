@@ -138,7 +138,7 @@ def main():
         noKeyDuration += 1
 
     #Actually send the new speed to the bot.
-    socketConnection.sendall(encodeSpeeds(leftSpeed, rightSpeed))
+    socketConnection.send(encodeSpeeds(leftSpeed, rightSpeed))
 
     #Render the UI elements.
     color = (55, 255, 100)
@@ -204,9 +204,10 @@ def noKeyPressed(key):
         key[ pygame.K_LSHIFT ]
 	)
 
+#Delimit JSON by dollar signs in case packets are concatenated.
 def encodeSpeeds(leftSpeed, rightSpeed):
   data = {"left": int(leftSpeed), "right": int(rightSpeed)}
-  return json.dumps(data)
+  return json.dumps(data)+"$"
 
 #If called from the command line, run the UI function.
 if __name__ == "__main__": main()
