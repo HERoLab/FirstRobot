@@ -51,14 +51,14 @@ def main():
   TCP_Port = 50007
   socketConnection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   socketConnection.connect((robotIP, TCP_Port))
-  print "\n-- Connecting to the robot on address: {}".format(robotAddress)
+  print "\n-- Connection established!"
 
   running = True
   while running:
 
     response = socketConnection.recv(bufferSize)
     if not response: 
-      print "\n-- CONNECTION LOST" #TODO: Make better error.
+      print "\nERROR: CONNECTION LOST" #TODO: Make better error.
       running = False
       break
 

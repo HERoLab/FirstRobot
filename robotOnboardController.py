@@ -13,8 +13,10 @@ serialConnection = None
 for port in list_ports.comports():
   for data in port:
     if "ACM0" in data:
+      print "-- Attempting serial connection..."
       serialConnection = serial.Serial(data, baudrate=9600)
       print "-- Established serial connection!"
+      break
 
 if not serialConnection:
   print "ERROR: Failed to make serial connection!"
@@ -29,7 +31,7 @@ socketConnection.bind((TCP_host, TCP_port))
 socketConnection.listen(1)
 
 controllerConnection, controllerAddress = socketConnection.accept()
-print "\n-- Connected to the controller at address: {}".format(robotAddress)
+print "\n-- Connected to the controller at address: {}".format(controllerAddress)
 
 while True:
   data = controllerConnection.recv(bufferSize)

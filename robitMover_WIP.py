@@ -8,7 +8,6 @@ I DECLARE THIS CODE AND ALL TRADEMARKS OF THE WALT DISNEY CORPORATION MY PROPERT
 import time
 import serial.tools.list_ports as list_ports
 import serial
-import Tkinter as tk
 from subprocess import check_output
 
 class Robot_Driver(object):
@@ -38,7 +37,6 @@ class Robot_Driver(object):
                     if 'ACM0' in data:  #ACM0 is the special COM port created for microcontrollers like arduino
                         mySerial = serial.Serial(data,baudrate=9600)
                         print 'serial started on ' + data
-			#TODO: INFINITE LOOP FOR KEY COMMANDS.
                         break
             print 'Arduino not found!'
         else:
