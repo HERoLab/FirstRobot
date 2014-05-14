@@ -1,7 +1,6 @@
 import sys, time
 
-import serial.tools.list_ports as list_ports
-import serial
+import socket
 from subprocess import check_output
 
 import pygame
@@ -46,20 +45,23 @@ def main():
   noKeyDuration = 0
   turning = False
 
-  serialConnection = None
-  #Check each COM port for Arduino's special "ACM0" port.
-  for port in list_ports.comports():
-    for data in port:
-      if "ACM0" in data:
-        serialConnection = serial.Serial(data, badurate=9600)
-        print "--Established serial connection!"
+  #Set up the TCP connection.
+  robotIP = raw_input("\n-- What is the IP of the robit? ")
+  bufferSize = 1024
+  TCP_Port = 50007
+  socketConnection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  socketConnection.connect((robotIP, TCP_Port))
+  print "\n-- Connecting to the robot on address: {}".format(robotAddress)
 
-  if not serialConnection:
-    print "ERROR: Failed to make serial connection!"
-    running = False
-    
-
+  running = True
   while running:
+
+    response = socketConnection.recv(bufferSize)
+    if not response: 
+      print "\n-- CONNECTION LOST" #TODO: Make better error.
+      running = False
+      break
+
     pygame.event.pump() #Flush the last key presses.
     for event in pygame.event.get():
       try:
@@ -133,9 +135,8 @@ def main():
       else:
         noKeyDuration += 1
 
-    #Write the speeds to the serial ports.
-    serialConnection.write(hex(leftSpeed+motorOffset))
-    serialConnection.write(hex(rightSpeed))
+    #Actually send the new speed to the bot.
+    socketConnection.sendall(encodeSpeeds(leftSpeed, rightSpeed))
 
     #Render the UI elements.
     color = (55, 255, 100)
@@ -154,6 +155,8 @@ def main():
 
     #Add a delay so the operations don't occur too quickly.
     pygame.time.delay(eventWait)
+ 
+  robotConnection.close()
 
   #Close the window.
   print "-- Quitting..."
@@ -198,6 +201,9 @@ def noKeyPressed(key):
         key[ pygame.K_SPACE ] or
         key[ pygame.K_LSHIFT ]
 	)
+
+def encodeSpeeds(leftSpeed, rightSpeed):
+  return {"left": int(leftSpeed), "right": int(rightSpeed)}
 
 #If called from the command line, run the UI function.
 if __name__ == "__main__": main()
