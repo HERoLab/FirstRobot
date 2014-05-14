@@ -1,7 +1,7 @@
 import socket
 import serial.tools.list_ports as list_ports
 import serial
-
+import json
 
 #Variable Setup
 originSpeed = 47
@@ -34,7 +34,7 @@ controllerConnection, controllerAddress = socketConnection.accept()
 print "\n-- Connected to the controller at address: {}".format(controllerAddress)
 
 while True:
-  data = controllerConnection.recv(bufferSize)
+  raw_data = controllerConnection.recv(bufferSize)
   if data==None:
     timeout += 1
     print "ERROR: No data received! ({})".format(timeout)
@@ -44,7 +44,9 @@ while True:
   if timeout > 1000:
     break
 
-  controllerConnection.sendall(data)
+  #controllerConnection.sendall(data)
+  data = json.loads(raw_data)
+
   #Write the speeds to the serial ports.
   serialConnection.write(hex(data["left"]+motorOffset))
   serialConnection.write(hex(data["right"]))

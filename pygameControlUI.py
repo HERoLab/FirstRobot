@@ -1,7 +1,7 @@
 import sys, time
 
 import socket
-from subprocess import check_output
+import json
 
 import pygame
 from pygame.locals import *
@@ -56,11 +56,13 @@ def main():
   running = True
   while running:
 
+    """
     response = socketConnection.recv(bufferSize)
     if not response: 
       print "\nERROR: CONNECTION LOST" #TODO: Make better error.
       running = False
       break
+    """
 
     pygame.event.pump() #Flush the last key presses.
     for event in pygame.event.get():
@@ -203,7 +205,8 @@ def noKeyPressed(key):
 	)
 
 def encodeSpeeds(leftSpeed, rightSpeed):
-  return {"left": int(leftSpeed), "right": int(rightSpeed)}
+  data = {"left": int(leftSpeed), "right": int(rightSpeed)}
+  return json.dumps(data)
 
 #If called from the command line, run the UI function.
 if __name__ == "__main__": main()
