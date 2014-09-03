@@ -56,7 +56,7 @@ void loop(){
   if (Serial.available() > 0)
   {
     do {
-      temp = int(Serial.read()); //get a byte, convert to int
+      temp = atoi(Serial.read()); //get a byte, convert to int
       Serial.print(temp);
       Serial.println(int(temp));
       if (temp == ESTOP) {  //If temp is an EMERGENCY STOP REQUEST

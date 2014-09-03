@@ -22,8 +22,8 @@ if not serialConnection:
   print "ERROR: Failed to make serial connection!"
 
 #Set up the TCP connection.
-print "-- Starting TCP server!"
-bufferSize = 1024
+print "-- Server ready..."
+bufferSize = 4096
 TCP_port = 50007
 TCP_host = ""
 socketConnection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -49,13 +49,13 @@ while True:
   data = json.loads(mostRecentData)
 
   #Write the speeds to the serial ports.
-  serialConnection.write(hex(data["left"]+motorOffset))
-  serialConnection.write(hex(data["right"]))
+  serialConnection.write(str(data["left"]+motorOffset))
+  serialConnection.write(str(data["right"]))
 
 
 #On quit, write the motors to stop.
-serialConnection.write(hex(originSpeed+motorOffset))
-serialConnection.write(hex(originSpeed))
+serialConnection.write(str(originSpeed+motorOffset))
+serialConnection.write(str(originSpeed))
 
 controllerConnection.close()
 print "Stopping robit!"
