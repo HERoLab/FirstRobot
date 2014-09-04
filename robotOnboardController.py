@@ -21,9 +21,10 @@ for port in list_ports.comports():
 if not serialConnection:
   print "ERROR: Failed to make serial connection!"
 
+
 #Set up the TCP connection.
 print "-- Starting TCP server!"
-bufferSize = 1024
+bufferSize = 1
 TCP_port = 50007
 TCP_host = ""
 socketConnection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -34,7 +35,7 @@ controllerConnection, controllerAddress = socketConnection.accept()
 print "\n-- Connected to the controller at address: {}".format(controllerAddress)
 
 while True:
-  raw_data = controllerConnection.recv(bufferSize)
+  raw_data = controllerConnection.recv(4096)
   if data==None:
     timeout += 1
     print "ERROR: No data received! ({})".format(timeout)
@@ -45,17 +46,26 @@ while True:
     break
 
   #Only use the most recent speed in case a packet is lost.
-  mostRecentData = raw_data.split("$")[-2]
-  data = json.loads(mostRecentData)
+  try:
+    print raw_data
+    mostRecentData = raw_data.split("$")[-2]
+    data = json.loads(mostRecentData)
+    print "Got data!\n"
+  except Exception as e:
+    print e
+    continue
 
-  #Write the speeds to the serial ports.
-  serialConnection.write(hex(data["left"]+motorOffset))
-  serialConnection.write(hex(data["right"]))
+  
+  #Write the speeds to the serial ports
+  print "left data: " + str(data["left"])
+  print "right data: " + str(data["right"]) 
+  serialConnection.write(bytes(data["left"]+motorOffset))
+  serialConnection.write(bytes(data["right"]))
 
 
 #On quit, write the motors to stop.
-serialConnection.write(hex(originSpeed+motorOffset))
-serialConnection.write(hex(originSpeed))
+serialConnection.write(str(originSpeed+motorOffset))
+serialConnection.write(str(originSpeed))
 
 controllerConnection.close()
 print "Stopping robit!"
