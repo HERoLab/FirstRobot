@@ -42,19 +42,14 @@ void loop(){
   //Reads motor commads from the Serial buffer.
   //If there are multiple bytes in the buffer, check every byte
   //to find the most recent command for EACH motor.
-  if (Serial.available() > 0)
-  {
-    do {
-      temp = int(Serial.read()); //get a byte, convert to int
-      Serial.print(temp);
-      Serial.println(int(temp));
+  if (Serial.available() > 0) {
+      temp = numberFromSerial();
       if (temp == ESTOP) { //If temp is an EMERGENCY STOP REQUEST
         analogWrite(rightJag, 47);
         analogWrite(leftJag,47);
         rightSpeed = 47;
         leftSpeed = 47;
         Serial.println('STOPPED');
-        Serial.println(Serial.read());
         Serial.flush();
       }
       else if (temp >= 20 and temp <= 129) { //If temp is a valid motor speed setting
@@ -66,8 +61,7 @@ void loop(){
           Serial.println('RXL' + leftVal);
           leftVal = temp-55; 
         } // -55 to fit the 20 to 74 range of Jaguar PWM signals
-      }
-    } 
+      } 
     while (Serial.available() > 0);
     //Update motor speeds as appropriate:
     if (leftVal != leftSpeed) { //only change the PWM setting if the motor isn't already at that speed
@@ -81,5 +75,27 @@ void loop(){
       Serial.println('WR' + rightSpeed);
     }
   }
+}
+
+/**
+  Code for reading numbers sent from a python pySerial connection.
+  Taken from: elcojacobs.com/communicating-between-python-and-arduino-with-pyserial/
+*/
+int numberFromSerial(void)
+{
+  char numberString[8];
+  unsigned char index=0;
+  delay(10);
+  while(Serial.available() > 0)
+  {
+    delay(10);
+    numberString[index++]=Serial.read();
+    if(index > 6)
+    {
+      break;
+    }
+  }
+  numberString[index]=0;
+  return atoi(numberString);
 }
 
