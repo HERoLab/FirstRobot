@@ -56,12 +56,19 @@ while True:
     print e
     continue
 
+  #Create a string representation of the `left` and `right` motor values.
+  left = str(data["left"]+motorOffset)
+  right = str(data["right"])
+
+  #Make sure `left` and `right` are each 3-digits long.
+  while (len(left)<3):
+    left = "0"+left
+  while (len(right)<3):
+    right = "0"+right
 
   #Write the speeds to the serial ports
-  left = data["left"]+motorOffset
-  right = data["right"]
-  serialConnection.write(str(left))
-  serialConnection.write(str(right))
+  serialConnection.write(left)
+  serialConnection.write(right)
 
   print "Left: {}   --  Right: {}".format(left, right)
   print "Arduino: {}".  format(serialConnection.read())
