@@ -55,12 +55,11 @@ while True:
     print e
     continue
 
-  
+
   #Write the speeds to the serial ports
-  print "left data: " + str(data["left"])
-  print "right data: " + str(data["right"]) 
   serialConnection.write(bytes(data["left"]+motorOffset))
   serialConnection.write(bytes(data["right"]))
+  print "Arduino: {}".format(serialConnection.read(4096))
 
 
 #On quit, write the motors to stop.
