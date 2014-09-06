@@ -23,8 +23,8 @@ if not serialConnection:
 
 
 #Set up the TCP connection.
-print "-- Starting TCP server!"
-bufferSize = 1
+print "-- Server ready..."
+bufferSize = 4096
 TCP_port = 50007
 TCP_host = ""
 socketConnection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

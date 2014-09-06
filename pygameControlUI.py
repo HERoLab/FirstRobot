@@ -16,11 +16,11 @@ stabilizeSpeed = 3 #The speed at which to "stabilize" turns.
 leftSpeed = originSpeed
 rightSpeed = originSpeed
 breakDelay = 10
-eventWait = 50
+eventWait = 100
 motorOffset = 55 #The offset for the left motor (see Arduino Program).
 keysPressed = None
 
-# # # # # # # # # # #  Main UI Function  # # # # # # # # # # # 
+# # # # # # # # # # #  Main UI Function  # # # # # # # # # # #
 def main():
   global rightSpeed, leftSpeed, originSpeed, breakDelay, eventWait
 
@@ -47,7 +47,6 @@ def main():
 
   #Set up the TCP connection.
   robotIP = raw_input("\n-- What is the IP of the robit? ")
-  bufferSize = 1024
   TCP_Port = 50007
   socketConnection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   socketConnection.connect((robotIP, TCP_Port))
@@ -55,14 +54,6 @@ def main():
 
   running = True
   while running:
-
-    """
-    response = socketConnection.recv(bufferSize)
-    if not response: 
-      print "\nERROR: CONNECTION LOST" #TODO: Make better error.
-      running = False
-      break
-    """
 
     pygame.event.pump() #Flush the last key presses.
     for event in pygame.event.get():
@@ -83,7 +74,7 @@ def main():
     #Get the keys that are currently pressed.
     key = pygame.key.get_pressed()
 
-    # # # # # # Session Controls # # # # # # # 
+    # # # # # # Session Controls # # # # # # #
     #End the session if "q" "b" or "ESC" are pressed. Also slow the 'bot.
     if key[ pygame.K_q ] or key[ pygame.K_b ] or key[ pygame.K_ESCAPE ]:
       rightSpeed = changeSpeed(originSpeed)
@@ -95,7 +86,7 @@ def main():
     if key[ pygame.K_UP ]:
       rightSpeed = incrementSpeed(1, rightSpeed)
       leftSpeed = incrementSpeed(1, leftSpeed)
-    elif key[ pygame.K_DOWN ]: 
+    elif key[ pygame.K_DOWN ]:
       rightSpeed = incrementSpeed(-1, rightSpeed)
       leftSpeed = incrementSpeed(-1, leftSpeed)
 
@@ -121,12 +112,12 @@ def main():
         noKeyDuration = noKeyDuration*3/4
         if rightSpeed > originSpeed: rightSpeed -= brakeSpeed
         elif rightSpeed < originSpeed: rightSpeed += brakeSpeed
-  
+
         if leftSpeed > originSpeed: leftSpeed -= brakeSpeed
         elif leftSpeed < originSpeed: leftSpeed += brakeSpeed
 
         #Allow the bot to stabilize to be moving forward as well.
-        if abs(leftSpeed-rightSpeed) < stabilizeSpeed: 
+        if abs(leftSpeed-rightSpeed) < stabilizeSpeed:
           leftSpeed = (leftSpeed+rightSpeed)/2
           rightSpeed = leftSpeed
         elif originSpeed > leftSpeed > rightSpeed: rightSpeed += stabilizeSpeed
@@ -138,6 +129,7 @@ def main():
         noKeyDuration += 1
 
     #Actually send the new speed to the bot.
+    print encodeSpeeds(leftSpeed, rightSpeed)
     socketConnection.send(encodeSpeeds(leftSpeed, rightSpeed))
 
     #Render the UI elements.
@@ -151,14 +143,12 @@ def main():
     screen.blit(left, (50, 50))
     screen.blit(right, (50, 80))
     screen.blit(direction, (50, 110))
-  
+
     #Display (or apparently "flip") the screen.
     pygame.display.flip()
 
     #Add a delay so the operations don't occur too quickly.
     pygame.time.delay(eventWait)
- 
-  robotConnection.close()
 
   #Close the window.
   print "-- Quitting..."
@@ -172,13 +162,13 @@ def incrementSpeed(change, speed):
   elif change < 0 and speed+change > minSpeed:
     return speed+change
   else:
-    return speed 
+    return speed
 
 def changeSpeed(newSpeed):
   if minSpeed <= newSpeed <= maxSpeed:
     return newSpeed
   else:
-    print "ERROR: Cannot set speed to {}".format(newSpeed) 
+    print "ERROR: Cannot set speed to {}".format(newSpeed)
     return originSpeed
 
 def getDirection():
