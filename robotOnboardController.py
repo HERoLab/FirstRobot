@@ -45,20 +45,25 @@ while True:
   if timeout > 1000:
     break
 
-  #Only use the most recent speed in case a packet is lost.
   try:
-    print raw_data
     mostRecentData = raw_data.split("$")[-2]
     data = json.loads(mostRecentData)
-    print "Got data!\n"
+
+  except IndexError:
+    break
+
   except Exception as e:
     print e
     continue
 
 
   #Write the speeds to the serial ports
-  serialConnection.write(bytes(data["left"]+motorOffset))
-  serialConnection.write(bytes(data["right"]))
+  left = data["left"]+motorOffset
+  right = data["right"]
+  serialConnection.write(str(left))
+  serialConnection.write(str(right))
+
+  print "Left: {}   --  Right: {}".format(left, right)
   print "Arduino: {}".  format(serialConnection.read())
 
 
