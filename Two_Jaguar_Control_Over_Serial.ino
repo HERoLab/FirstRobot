@@ -1,3 +1,4 @@
+// TODO: Look at http://www.elcojacobs.com/communicating-between-python-and-arduino-with-pyserial/
 /*
   ==========PROTOCOL:==========
     To control RIGHT Jaguar, send decimal values in range 20-74 (hex 0x14-0x4A)
@@ -51,7 +52,7 @@ void setup()
 
 void loop(){
   //Reads motor commads from the Serial buffer.
-  //If there are multiple bytes in the buffer, check every byte 
+  //If there are multiple bytes in the buffer, check every byte
   //to find the most recent command for EACH motor.
   if (Serial.available() > 0)
   {
@@ -75,7 +76,7 @@ void loop(){
         else {   //LEFT motor setting
           Serial.print('LLLLLLLLLLLLLL');
           leftVal = temp-55;  }  // -55 to fit the 20 to 74 range of Jaguar PWM signals
-      }        
+      }
     } while (Serial.available() > 0);
       //Update motor speeds as appropriate:
      if (leftVal != leftSpeed) {  //only change the PWM setting if the motor isn't already at that speed
