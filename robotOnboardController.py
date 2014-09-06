@@ -71,7 +71,7 @@ while True:
   serialConnection.write(right)
 
   print "Left: {}   --  Right: {}".format(left, right)
-  print "Arduino: {}".  format(serialConnection.read())
+  print "Arduino: {} -- {}".format(serialConnection.read(3), serialConnection.read(3))
 
 
 #On quit, write the motors to stop.

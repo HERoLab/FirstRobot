@@ -17,8 +17,9 @@ const int j_max = 74; //FULL FORWARD (hex 0x4A)
 //EMERGENCY STOP VALUE: Stops both Jags (sets them to j_mid) when received:
 const int ESTOP = 0; //EMERGENCY STOP
 int leftVal, rightVal = 47; //new motor speed settings
-int temp = 0; //temp value for unprocessed bytes received over Serial.
+//int temp = 0; //temp value for unprocessed bytes received over Serial.
 int leftSpeed, rightSpeed; //current speed of the motors
+
 void setup()
 {
   //set the PWM frequency for timer 1 to be 122Hz
@@ -37,67 +38,33 @@ void setup()
   analogWrite(leftJag,j_mid);
   analogWrite(rightJag,j_mid);
   leftSpeed, rightSpeed = j_mid; //record the setting of the motors
-  Serial.println("TESTTTTTTTTT");
-}
-void loop(){
-  //Reads motor commands from the Serial buffer.
-  //If there are multiple bytes in the buffer, check every byte
-  //  to find the most recent command for EACH motor.
-  if (Serial.available() > 0) {
-      temp = numberFromSerial();
-      Serial.println("GOT"+temp);
-      if (temp == ESTOP) { //If temp is an EMERGENCY STOP REQUEST
-        analogWrite(rightJag, 47);
-        analogWrite(leftJag,47);
-        rightSpeed = 47;
-        leftSpeed = 47;
-        Serial.println('STOPPED');
-        Serial.flush();
-      }
-      else if (temp >= 20 and temp <= 129) { //If temp is a valid motor speed setting
-        if (temp < 75) { //Record RIGHT motor setting
-          Serial.println('RXR' + rightVal);
-          rightVal = temp; 
-        }
-        else { //LEFT motor setting
-          Serial.println('RXL' + leftVal);
-          leftVal = temp-55; 
-        } // -55 to fit the 20 to 74 range of Jaguar PWM signals
-      } 
-    while (Serial.available() > 0);
-    //Update motor speeds as appropriate:
-    if (leftVal != leftSpeed) { //only change the PWM setting if the motor isn't already at that speed
-      analogWrite(leftJag, leftVal);
-      leftSpeed = leftVal;
-      Serial.println('WL' + leftSpeed);
-    }
-    if (rightVal != rightSpeed) {
-      analogWrite(rightJag, rightVal);
-      rightSpeed = rightVal; 
-      Serial.println('WR' + rightSpeed);
-    }
-  }
 }
 
-/**
-  Code for reading numbers sent from a python pySerial connection.
-  Taken from: elcojacobs.com/communicating-between-python-and-arduino-with-pyserial/
-*/
-int numberFromSerial(void)
-{
-  char numberString[8];
-  unsigned char index=0;
-  delay(10);
-  while(Serial.available() > 0)
-  {
-    delay(10);
-    numberString[index++]=Serial.read();
-    if(index > 6)
-    {
-      break;
+char intBuffer[3];
+String intData = "";
+int delimiter = (int) '\n';
+
+void loop(){
+  int i = intFromSerial(); 
+}
+
+int intFromSerial() {
+  while (Serial.available()) {
+    int ch = Serial.read();
+    if (ch==-1) {
+      break; //TODO: Handle Error! 
+    } else if (ch == delimiter) {
+      break; 
+    } else {
+      intData += (char) ch;
     }
   }
-  numberString[index]=0;
-  return atoi(numberString);
+  
+  intData.toCharArray(intBuffer, intData.length()+1);
+  intData = "";
+
+  int i = atoi(intBuffer);
+  Serial.write(intBuffer);
+  return i;
 }
 
