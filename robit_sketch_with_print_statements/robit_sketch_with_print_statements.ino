@@ -37,13 +37,15 @@ void setup()
   analogWrite(leftJag,j_mid);
   analogWrite(rightJag,j_mid);
   leftSpeed, rightSpeed = j_mid; //record the setting of the motors
+  Serial.println("TESTTTTTTTTT");
 }
 void loop(){
-  //Reads motor commads from the Serial buffer.
+  //Reads motor commands from the Serial buffer.
   //If there are multiple bytes in the buffer, check every byte
-  //to find the most recent command for EACH motor.
+  //  to find the most recent command for EACH motor.
   if (Serial.available() > 0) {
       temp = numberFromSerial();
+      Serial.println("GOT"+temp);
       if (temp == ESTOP) { //If temp is an EMERGENCY STOP REQUEST
         analogWrite(rightJag, 47);
         analogWrite(leftJag,47);
