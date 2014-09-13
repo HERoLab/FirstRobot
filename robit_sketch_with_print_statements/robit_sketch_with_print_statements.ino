@@ -10,94 +10,80 @@ const int rightJag = 10; //RIGHT Jaguar governed by pwm on pin 10
 const int jagpwrpin = 5;//using pin 7 as the pwm power reference
 const int jaggndpin = 6;//pwm ground reference
 const int ledpin = 13;//using the standard LED as a status indicator
+
 //Jag motor speed reference:
-const int j_mid = 47; //stopped (hex 0x2F)
-const int j_min = 20; //FULL REVERSE (hex 0x14)
-const int j_max = 74; //FULL FORWARD (hex 0x4A)
-//EMERGENCY STOP VALUE: Stops both Jags (sets them to j_mid) when received:
-const int ESTOP = 0; //EMERGENCY STOP
-int leftVal, rightVal = 47; //new motor speed settings
-int temp = 0; //temp value for unprocessed bytes received over Serial.
-int leftSpeed, rightSpeed; //current speed of the motors
-void setup()
-{
+const int speed_mid = 47; //stopped (hex 0x2F)
+const int speed_min = 20; //FULL REVERSE (hex 0x14)
+const int speed_max = 74; //FULL FORWARD (hex 0x4A)
+const int motor_diff = 55;
+
+void setup(){
   //set the PWM frequency for timer 1 to be 122Hz
   TCCR1B = TCCR1B & 0b11111000 | 0x04;
+
   //setup the PWM reference pins:
   pinMode(leftJag, OUTPUT);
   pinMode(rightJag, OUTPUT);
   pinMode(jagpwrpin, OUTPUT);
   pinMode(jaggndpin, OUTPUT);
+
   //define the pwm reference voltages
   digitalWrite(jagpwrpin,HIGH);
   digitalWrite(jaggndpin,LOW);
+
   //start the Serial interface.
   Serial.begin(9600);
+  Serial.flush();
+
   //set the pwm to midscale so the Jaguars don't move at startup:
-  analogWrite(leftJag,j_mid);
-  analogWrite(rightJag,j_mid);
-  leftSpeed, rightSpeed = j_mid; //record the setting of the motors
-  Serial.println("TESTTTTTTTTT");
-}
-void loop(){
-  //Reads motor commands from the Serial buffer.
-  //If there are multiple bytes in the buffer, check every byte
-  //  to find the most recent command for EACH motor.
-  if (Serial.available() > 0) {
-      temp = numberFromSerial();
-      Serial.println("GOT"+temp);
-      if (temp == ESTOP) { //If temp is an EMERGENCY STOP REQUEST
-        analogWrite(rightJag, 47);
-        analogWrite(leftJag,47);
-        rightSpeed = 47;
-        leftSpeed = 47;
-        Serial.println('STOPPED');
-        Serial.flush();
-      }
-      else if (temp >= 20 and temp <= 129) { //If temp is a valid motor speed setting
-        if (temp < 75) { //Record RIGHT motor setting
-          Serial.println('RXR' + rightVal);
-          rightVal = temp; 
-        }
-        else { //LEFT motor setting
-          Serial.println('RXL' + leftVal);
-          leftVal = temp-55; 
-        } // -55 to fit the 20 to 74 range of Jaguar PWM signals
-      } 
-    while (Serial.available() > 0);
-    //Update motor speeds as appropriate:
-    if (leftVal != leftSpeed) { //only change the PWM setting if the motor isn't already at that speed
-      analogWrite(leftJag, leftVal);
-      leftSpeed = leftVal;
-      Serial.println('WL' + leftSpeed);
-    }
-    if (rightVal != rightSpeed) {
-      analogWrite(rightJag, rightVal);
-      rightSpeed = rightVal; 
-      Serial.println('WR' + rightSpeed);
-    }
-  }
+  analogWrite(leftJag,speed_mid);
+  analogWrite(rightJag,speed_mid);
 }
 
-/**
-  Code for reading numbers sent from a python pySerial connection.
-  Taken from: elcojacobs.com/communicating-between-python-and-arduino-with-pyserial/
-*/
-int numberFromSerial(void)
-{
-  char numberString[8];
-  unsigned char index=0;
-  delay(10);
-  while(Serial.available() > 0)
-  {
-    delay(10);
-    numberString[index++]=Serial.read();
-    if(index > 6)
-    {
+int delimiter = (int) '\n';
+int leftVal, rightVal = speed_mid; 
+
+void loop(){
+  // delay(100);
+
+  if (Serial.available() > 0) {
+    int lenBuffer = Serial.available();
+    int i = intFromSerial();
+    //int i = 50;
+
+    //if (leftVal!=i and rightVal!=i) {
+    char intBuffer[lenBuffer];
+    itoa(i,intBuffer, 10);
+    Serial.write(intBuffer);
+    Serial.println(" ");
+
+    //If i is a valid motor speed setting
+    if (i >= speed_min and i <= speed_max+speed_mid) { 
+      if (i <= speed_max) {
+        rightVal = i;
+        analogWrite(rightJag, i);
+      } else {
+        leftVal = i;
+        analogWrite(leftJag, i-motor_diff); //Subtract fit the 20 to 74 range of Jaguar PWM signals
+      } 
+    }
+
+  //}
+  }
+
+}
+
+int intFromSerial() {
+  String wholeInt = "";
+  while (Serial.available()>0){
+    int newInt = Serial.read();
+    if ( (char) newInt == (char) 'q' ) {
       break;
+    } else {
+      wholeInt += (char) newInt;
+      delay(10);
     }
   }
-  numberString[index]=0;
-  return atoi(numberString);
+  return wholeInt.toInt();  
 }
 
