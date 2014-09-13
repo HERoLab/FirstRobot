@@ -46,7 +46,8 @@ def main():
   turning = False
 
   #Set up the TCP connection.
-  robotIP = raw_input("\n-- What is the IP of the robit? ")
+  message = "\n-- What is the IP of the robit? (default: 192.168.1.100)"
+  robotIP = raw_input(message) or "192.168.1.100"
   TCP_Port = 50007
   socketConnection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   socketConnection.connect((robotIP, TCP_Port))
