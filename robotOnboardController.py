@@ -3,6 +3,11 @@ import serial.tools.list_ports as list_ports
 import serial
 import json
 
+
+def prepInt(i):
+  # Prepares an integer for writing to serial.
+  return str(i)+"q"
+
 #Variable Setup
 originSpeed = 47
 motorOffset = 55 #The offset for the left motor (see Arduino Program).
@@ -57,8 +62,8 @@ while True:
     continue
 
   #Create a string representation of the `left` and `right` motor values.
-  left = str(data["left"]+motorOffset)+"q"
-  right = str(data["right"])+"q"
+  left = data["left"]+motorOffset
+  right = data["right"]
 
   #Make sure `left` and `right` are each 3-digits long.
   """
@@ -69,8 +74,8 @@ while True:
   """
 
   #Write the speeds to the serial ports
-  serialConnection.write(left)
-  serialConnection.write(right)
+  serialConnection.write(prepInt(left))
+  serialConnection.write(prepInt(right))
 
   print "Left: {}   --  Right: {}".format(left, right)
 
@@ -79,8 +84,8 @@ while True:
 
 
 #On quit, write the motors to stop.
-serialConnection.write(str(originSpeed+motorOffset))
-serialConnection.write(str(originSpeed))
+serialConnection.write(prepInt(originSpeed+motorOffset))
+serialConnection.write(prepInt(originSpeed))
 
 controllerConnection.close()
 print "Stopping robit!"

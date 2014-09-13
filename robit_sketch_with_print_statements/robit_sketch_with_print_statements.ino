@@ -54,17 +54,17 @@ void loop(){
     //if (leftVal!=i and rightVal!=i) {
     char intBuffer[lenBuffer];
     itoa(i,intBuffer, 10);
-    Serial.write(intBuffer);
-    Serial.println(" ");
+    //Serial.write(intBuffer);
+    //Serial.println(" ");
 
     //If i is a valid motor speed setting
     if (i >= speed_min and i <= speed_max+speed_mid) { 
       if (i <= speed_max) {
-        rightVal = i;
-        analogWrite(rightJag, i);
+        rightVal = i; // Reverse the direction of the motor
+        analogWrite(rightJag, rightVal);
       } else {
-        leftVal = i;
-        analogWrite(leftJag, i-motor_diff); //Subtract fit the 20 to 74 range of Jaguar PWM signals
+        leftVal = 94 - (i - motor_diff);
+        analogWrite(leftJag, leftVal); //Subtract fit the 20 to 74 range of Jaguar PWM signals
       } 
     }
 
