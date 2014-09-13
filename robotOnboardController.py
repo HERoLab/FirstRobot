@@ -62,16 +62,10 @@ while True:
     continue
 
   #Create a string representation of the `left` and `right` motor values.
-  left = data["left"]+motorOffset
-  right = data["right"]
+  left = data["left"]
+  right = data["right"]+motorOffset
 
   #Make sure `left` and `right` are each 3-digits long.
-  """
-  while (len(left)<3):
-    left = "0"+left
-  while (len(right)<3):
-    right = "0"+right
-  """
 
   #Write the speeds to the serial ports
   serialConnection.write(prepInt(left))
