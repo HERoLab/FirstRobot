@@ -33,24 +33,32 @@ void setup(){
 
   //start the Serial interface.
   Serial.begin(9600);
+  Serial.flush();
 
   //set the pwm to midscale so the Jaguars don't move at startup:
   analogWrite(leftJag,speed_mid);
   analogWrite(rightJag,speed_mid);
 }
 
-char intBuffer[3];
-String intData = "";
 int delimiter = (int) '\n';
 int leftVal, rightVal = speed_mid; 
 
 void loop(){
-  int i = intFromSerial();
+  // delay(100);
 
-  if (leftVal!=i and rightVal!=i) {
-    Serial.println(String(i));
+  if (Serial.available() > 0) {
+    int lenBuffer = Serial.available();
+    int i = intFromSerial();
+    //int i = 50;
 
-    if (i >= speed_min and i <= speed_max+speed_mid) { //If i is a valid motor speed setting
+    //if (leftVal!=i and rightVal!=i) {
+    char intBuffer[lenBuffer];
+    itoa(i,intBuffer, 10);
+    Serial.write(intBuffer);
+    Serial.println(" ");
+
+    //If i is a valid motor speed setting
+    if (i >= speed_min and i <= speed_max+speed_mid) { 
       if (i <= speed_max) {
         rightVal = i;
         analogWrite(rightJag, i);
@@ -59,28 +67,23 @@ void loop(){
         analogWrite(leftJag, i-motor_diff); //Subtract fit the 20 to 74 range of Jaguar PWM signals
       } 
     }
+
+  //}
   }
 
 }
 
 int intFromSerial() {
-  while (Serial.available()) {
-    int ch = Serial.read();
-    if (ch==-1 || ch == delimiter) {
-      break; 
+  String wholeInt = "";
+  while (Serial.available()>0){
+    int newInt = Serial.read();
+    if ( (char) newInt == (char) 'q' ) {
+      break;
     } else {
-      intData += (char) ch;
+      wholeInt += (char) newInt;
+      delay(10);
     }
   }
-  
-  intData.toCharArray(intBuffer, intData.length()+1);
-  int i = atoi(intBuffer);
-  intData = "";
-
-
-  // Uncomment the following line and the necessary Pythons to enable debugging.
-  //Serial.write(intBuffer);
-
-  return i;
+  return wholeInt.toInt();  
 }
 
